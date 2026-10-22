@@ -230,7 +230,7 @@ flowchart TD
 |---|---|---|---|
 | J4.S1: Ask only the questions not already answered | system | D30, D35, D53 | I5 |
 | J4.S2: Record hard constraints separately from preferences | system | D13, D16, D42 | I3 |
-| J4.S3: Set digest size, delivery time and timezone | human | D15, D19, D20 |  |
+| J4.S3: Set digest size, delivery time and timezone | human | D15, D19, D69, D76 |  |
 | J4.S4: Save preferences and record delivery opt-in | system | D22, D46 | I6 |
 
 ### J4.S1
@@ -256,7 +256,9 @@ Surface: web; state: preferences.
 - **J4.S3.c1**: WHEN no digest size is chosen THE SYSTEM SHALL default it to 10
 - **J4.S3.c2**: WHEN a delivery time is chosen THE SYSTEM SHALL store the local time of day and a separate IANA timezone identifier
 - **J4.S3.c3**: IF a submitted timezone is not a recognised IANA identifier THE SYSTEM SHALL NOT save the schedule
-- **J4.S3.c4**: IF a submitted digest size falls outside the configured bounds THE SYSTEM SHALL NOT save the schedule
+- **J4.S3.c4**: IF a submitted digest size falls outside 3 to 20 THE SYSTEM SHALL NOT save the schedule
+- **J4.S3.c5**: WHEN delivery days are chosen THE SYSTEM SHALL store them as a set of weekdays evaluated in the subscriber's timezone
+- **J4.S3.c6**: IF no delivery day is selected THE SYSTEM SHALL NOT save the schedule
 
 ### J4.S4
 
