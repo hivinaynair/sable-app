@@ -7,17 +7,17 @@ openings on their own schedule, each with its fit, gaps and sources.
 **Status: stage 1 in progress.** The domain rules in `packages/core` are built and
 tested. The web app, agent, database and email are not built yet.
 
-Turborepo monorepo on pnpm workspaces (Node 24):
+Turborepo monorepo on bun workspaces (bun 1.4, Node 24):
 
 - `packages/core`: `@sable/core`, the pure domain rules (eligibility, deduplication, availability, freshness, scheduling, send idempotency, digest selection)
 - `apps/web`, `apps/agent`: the Next.js app and the eve agent, added as they are built
 
 ```sh
-pnpm install
-pnpm test           # all tests, through turbo
-pnpm typecheck
-pnpm spec:links     # regenerate docs/verification.json from test names
-pnpm check:spec     # validate the journey spec and its test links
+bun install
+bun test            # all tests, through bun's test runner
+bun run typecheck   # through turbo
+bun run spec:links  # regenerate docs/verification.json from test names
+bun run check:spec  # validate the journey spec and its test links
 ```
 
 - `docs/decisions.md`: decision record (accepted decisions, exclusions, open questions)

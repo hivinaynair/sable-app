@@ -1,17 +1,31 @@
 {
   "name": "sable-app",
   "private": true,
-  "packageManager": "pnpm@10.34.7",
+  "packageManager": "bun@1.4.0",
   "engines": {
+    "bun": ">=1.4.0",
     "node": ">=24"
   },
+  "devEngines": {
+    "packageManager": {
+      "name": "bun",
+      "version": "1.4.0",
+      "onFail": "error"
+    }
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
-    "test": "turbo run test",
+    "preinstall": "bunx only-allow@1.2.2 bun",
+    "test": "bun test",
     "typecheck": "turbo run typecheck",
     "check:spec": "bun ../skills/skills/journeys/scripts/journeys.ts check docs/journeys/thin-flow.yaml --verification docs/verification.json",
-    "spec:links": "node scripts/gen-verification.mjs"
+    "spec:links": "bun scripts/gen-verification.mjs"
   },
   "devDependencies": {
+    "@types/bun": "^1.3.14",
     "turbo": "^2.11.10"
   }
 }

@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "bun:test";
 import { missedRunAction, nextShortfallState, sendKey, shouldSendShortfallNotice } from "../src/delivery";
 
 describe("send idempotency and recovery", () => {

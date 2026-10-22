@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "bun:test";
 import { selectDigest, type DigestRequest } from "../src/digest";
 import { openingIdentity } from "../src/identity";
 import type { Opening } from "../src/types";

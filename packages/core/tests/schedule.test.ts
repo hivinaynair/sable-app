@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "bun:test";
 import { nextDelivery, validateSchedule, type DeliverySchedule } from "../src/schedule";
 
 const daily = (timezone: string, localTime = "08:00"): DeliverySchedule => ({ localTime, timezone, days: [1, 2, 3, 4, 5, 6, 7] });

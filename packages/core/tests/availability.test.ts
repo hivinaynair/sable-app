@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "bun:test";
 import { classifyOutcome, type RetrievalOutcome } from "../src/availability";
 import { needsRevalidation } from "../src/freshness";
 import { NOW, hoursAgo } from "./factory";
