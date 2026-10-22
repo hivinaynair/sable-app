@@ -67,8 +67,8 @@ invariants:
 coverage:
   - {id: C1, actor: subscriber, goal: Sign in and reach the right onboarding stage, status: mapped, journeys: [J1]}
   - {id: C2, actor: subscriber, goal: Provide a resume or enter a profile manually, status: mapped, journeys: [J2]}
-  - {id: C3, actor: subscriber, goal: Review and correct the extracted profile before it is used, status: mapped, journeys: [J3]}
-  - {id: C4, actor: subscriber, goal: Answer preference questions and set digest size and delivery schedule, status: mapped, journeys: [J4]}
+  - {id: C3, actor: subscriber, goal: Confirm the extracted profile at a glance, correcting it only if they choose, status: mapped, journeys: [J3]}
+  - {id: C4, actor: subscriber, goal: Answer a few preference questions and start digests on a default schedule, status: mapped, journeys: [J4]}
   - {id: C5, actor: subscriber, goal: Preview an initial ranked digest immediately, status: mapped, journeys: [J5]}
   - {id: C6, actor: operator, goal: Build and verify the shared job catalogue from a seed employer set, status: mapped, journeys: [J6]}
   - {id: C7, actor: subscriber, goal: Receive a test email digest, status: mapped, journeys: [J7]}
@@ -115,12 +115,14 @@ journeys:
         title: Authenticate with Clerk
         kind: system
         surface: web
-        decisions: [D1, D35]
+        decisions: [D1, D35, D95]
         invariants: [I5]
         criteria:
           c1: WHEN a visitor completes Clerk sign-in THE SYSTEM SHALL create or load the subscriber record keyed to the verified Clerk user id
           c2: IF a request carries no verified Clerk session THE SYSTEM SHALL NOT return any subscriber data
           c3: IF a request supplies a subscriber id that differs from the verified session principal THE SYSTEM SHALL NOT act on the supplied id
+          c4: IF the identity provider is unavailable THE SYSTEM SHALL NOT create or modify a subscriber record
+          c5: WHEN the identity provider is unavailable THE SYSTEM SHALL leave the visitor unauthenticated and offer a retry
         next:
           - {to: J1.S2, when: authenticated}
           - {exit: denied, when: unauthenticated}
@@ -128,7 +130,7 @@ journeys:
         title: Route to the first incomplete onboarding stage
         kind: system
         surface: web
-        decisions: [D29, D30]
+        decisions: [D105, D30]
         invariants: []
         criteria:
           c1: WHEN a signed-in subscriber has no draft or confirmed profile THE SYSTEM SHALL route them to the resume stage
@@ -149,8 +151,9 @@ journeys:
         reason: Onboarding stage is derived from persisted profile and preference state on every entry, so a closed tab resumes at the same stage
         refs: [J1.S2.c1, J1.S2.c2, J1.S2.c3]
       dependencies:
-        status: open
-        reason: Behaviour when Clerk itself is unavailable is unspecified. Recommend showing a retry page and emitting no partial subscriber record
+        status: covered
+        reason: Under D95 an unavailable identity provider leaves the visitor unauthenticated with a retry and writes no partial subscriber record
+        refs: [J1.S1.c4, J1.S1.c5]
       duplicates:
         status: covered
         reason: The subscriber record is keyed to the Clerk user id, so repeated sign-ins load rather than duplicate it
@@ -175,13 +178,16 @@ journeys:
         kind: human
         surface: web
         state: resume_stage
-        decisions: [D47, D35]
+        decisions: [D47, D35, D59, D95, D96]
         invariants: [I5]
         criteria:
           c1: WHEN a subscriber uploads a PDF or DOCX within the configured size limit THE SYSTEM SHALL store it in private object storage scoped to that subscriber
           c2: IF an upload fails type or size validation THE SYSTEM SHALL NOT store the file
           c3: WHEN an upload fails validation THE SYSTEM SHALL offer manual entry as a fallback
           c4: IF a principal requests a stored resume they do not own THE SYSTEM SHALL NOT return it
+          c5: IF object storage is unavailable or rejects the write THE SYSTEM SHALL NOT record the upload as stored
+          c6: WHEN object storage is unavailable THE SYSTEM SHALL keep the subscriber at the resume stage and offer a retry
+          c7: WHEN a subscriber uploads a replacement resume THE SYSTEM SHALL delete the previously stored upload and retain only the newest one
         next:
           - {to: J2.S2, when: file_accepted}
           - {to: J2.S3, when: manual_entry_chosen}
@@ -189,7 +195,7 @@ journeys:
       - id: J2.S2
         title: Extract a draft profile from the document
         kind: system
-        decisions: [D28, D32, D43]
+        decisions: [D28, D32, D43, D95, D96, D97]
         invariants: [I4, I8]
         criteria:
           c1: WHEN extraction runs THE SYSTEM SHALL record for each extracted item the document location it came from
@@ -197,6 +203,11 @@ journeys:
           c3: IF the document contains text that instructs the agent THE SYSTEM SHALL NOT act on that text
           c4: IF an extracted claim has no supporting location in the document THE SYSTEM SHALL NOT include it in the draft profile
           c5: WHEN extraction yields no usable professional experience THE SYSTEM SHALL offer manual entry
+          c6: IF the extraction model is unavailable or fails THE SYSTEM SHALL NOT write a partial draft profile
+          c7: WHEN extraction fails THE SYSTEM SHALL keep the subscriber at the resume stage and offer a retry
+          c8: WHEN a replacement upload is extracted THE SYSTEM SHALL replace the subscriber's existing draft profile rather than adding a second one
+          c9: WHEN extraction begins THE SYSTEM SHALL claim the subscriber's draft profile as its single writer
+          c10: IF another extraction holds that claim THE SYSTEM SHALL NOT write the draft profile
         next:
           - {to: J2.S3, when: extraction_unusable}
           - {exit: draft_profile_ready, when: extraction_usable}
@@ -226,57 +237,66 @@ journeys:
         reason: The stored file and the draft profile are separate persisted artifacts, so an interrupted extraction leaves the upload intact and the subscriber can resubmit or switch to manual entry
         refs: [J2.S1.c1, J2.S2.c5]
       dependencies:
-        status: open
-        reason: Behaviour when object storage or the extraction model is unavailable is unspecified. Recommend keeping the subscriber at the resume stage with a retry and no partial draft profile
+        status: covered
+        reason: Under D95 an unavailable object store or extraction model keeps the subscriber at the resume stage with a retry and persists neither a stored upload nor a partial draft profile
+        refs: [J2.S1.c5, J2.S1.c6, J2.S2.c6, J2.S2.c7]
       duplicates:
-        status: open
-        reason: Behaviour when a subscriber uploads a second resume is unspecified. Recommend replacing the draft profile and retaining only the newest upload, consistent with the minimised retention recommended under Q11
+        status: covered
+        reason: Under D96 a replacement upload deletes the previous file and replaces the one draft profile, which is also the minimal retention D59 requires
+        refs: [J2.S1.c7, J2.S2.c8]
       concurrency:
-        status: open
-        reason: Two concurrent uploads for one subscriber could race to write one draft profile. Recommend a single-writer claim per subscriber on the draft profile
+        status: covered
+        reason: Under D97 extraction claims the draft profile as its single writer, so a concurrent extraction does not interleave items from two documents
+        refs: [J2.S2.c9, J2.S2.c10]
       recovery:
         status: covered
         reason: Manual entry is always reachable as a fallback from both a rejected upload and an unusable extraction
         refs: [J2.S1.c3, J2.S2.c5]
 
   - id: J3
-    title: Review and confirm the profile
+    title: Confirm the profile at a glance
     actor: subscriber
     entry: J3.S1
     exits: [profile_confirmed]
     steps:
       - id: J3.S1
-        title: Present the draft profile with its provenance
+        title: Present a one-glance summary of the draft profile
         kind: system
         surface: web
         state: profile_review
-        decisions: [D28, D29, D35]
+        decisions: [D28, D35, D104, D105]
         invariants: [I4, I5]
         criteria:
           c1: WHEN a draft profile is displayed THE SYSTEM SHALL mark each item as extracted from the document or manually entered
           c2: IF an item was not extracted from the document THE SYSTEM SHALL NOT label it as extracted
           c3: WHEN an item was extracted THE SYSTEM SHALL let the subscriber see the document location it came from
           c4: IF the requesting principal does not own the draft profile THE SYSTEM SHALL NOT display it
+          c5: WHEN the draft profile is displayed THE SYSTEM SHALL summarise it on one screen with a single confirm action
+          c6: IF the subscriber does not choose to edit THE SYSTEM SHALL NOT require them to review items one by one
         next:
-          - {to: J3.S2, when: displayed}
+          - {to: J3.S3, when: confirmed}
+          - {to: J3.S2, when: edit_chosen}
       - id: J3.S2
-        title: Correct, add, remove or reclassify items
+        title: Optionally correct, add, remove or reclassify items
         kind: human
         surface: web
         state: profile_review
-        decisions: [D28, D29]
+        decisions: [D28, D98, D105]
         invariants: []
         criteria:
           c1: WHEN a subscriber edits an item THE SYSTEM SHALL persist that edit before advancing to the next stage
           c2: WHEN a subscriber moves an item between professional experience and personal projects THE SYSTEM SHALL store the new classification
           c3: WHEN a subscriber removes an item THE SYSTEM SHALL stop using it for matching
+          c4: WHEN a subscriber submits an edit THE SYSTEM SHALL require the item version that edit was based on
+          c5: IF the submitted item version is stale THE SYSTEM SHALL NOT apply that edit
+          c6: WHEN an edit is refused as stale THE SYSTEM SHALL tell that writer to reload the item before editing it again
         next:
-          - {to: J3.S3, when: submitted}
+          - {to: J3.S1, when: edits_saved}
           - {to: J3.S2, when: further_edits}
       - id: J3.S3
         title: Confirm the profile
         kind: system
-        decisions: [D29, D43]
+        decisions: [D43, D105]
         invariants: [I4]
         criteria:
           c1: WHEN a subscriber confirms THE SYSTEM SHALL record the confirmed profile with its confirmation timestamp
@@ -304,31 +324,35 @@ journeys:
         reason: Repeated confirmation records the same confirmed profile and its timestamp rather than creating a second profile
         refs: [J3.S3.c1]
       concurrency:
-        status: open
-        reason: Two sessions editing one draft profile could overwrite each other. Recommend last-write-wins on a per-item version with the losing writer told to reload
+        status: covered
+        reason: Under D98 each edit carries the item version it was based on, so a stale edit is refused and its writer is told to reload rather than silently overwriting a correction
+        refs: [J3.S2.c4, J3.S2.c5, J3.S2.c6]
       recovery:
         status: covered
         reason: An unconfirmed profile cannot be used for recommendations, and a later edit re-requires confirmation
         refs: [J3.S3.c2, J3.S3.c3]
 
   - id: J4
-    title: Set preferences and delivery schedule
+    title: Answer a few questions and start digests
     actor: subscriber
     entry: J4.S1
     exits: [preferences_saved]
     steps:
       - id: J4.S1
-        title: Ask only the questions not already answered
+        title: Ask only the few questions the profile does not answer
         kind: system
         surface: web
         state: preferences
-        decisions: [D30, D35, D53]
+        decisions: [D30, D35, D53, D104, D106]
         invariants: [I5]
         criteria:
           c1: WHEN the question set is built THE SYSTEM SHALL omit questions already answered by the confirmed profile or a previous answer
           c2: WHEN a subscriber selects their target job families THE SYSTEM SHALL present only the question branches belonging to those families
           c3: IF the subscriber selects no job family THE SYSTEM SHALL NOT advance to the next stage
           c4: IF the requesting principal does not own the preferences THE SYSTEM SHALL NOT return or modify them
+          c5: WHEN the question set is built THE SYSTEM SHALL require answers only to job family and to hard constraints the confirmed profile does not settle
+          c6: WHEN a ranking preference can be inferred from the confirmed profile THE SYSTEM SHALL prefill it
+          c7: IF a ranking preference is unanswered THE SYSTEM SHALL NOT block the subscriber from advancing
         next:
           - {to: J4.S2, when: answered}
       - id: J4.S2
@@ -344,11 +368,11 @@ journeys:
         next:
           - {to: J4.S3, when: stored}
       - id: J4.S3
-        title: Set digest size, delivery time and timezone
-        kind: human
+        title: Default the delivery schedule unless the subscriber changes it
+        kind: system
         surface: web
         state: preferences
-        decisions: [D15, D19, D69, D76]
+        decisions: [D15, D19, D69, D76, D106]
         invariants: []
         criteria:
           c1: WHEN no digest size is chosen THE SYSTEM SHALL default it to 10
@@ -357,17 +381,26 @@ journeys:
           c4: IF a submitted digest size falls outside 3 to 20 THE SYSTEM SHALL NOT save the schedule
           c5: WHEN delivery days are chosen THE SYSTEM SHALL store them as a set of weekdays evaluated in the subscriber's timezone
           c6: IF no delivery day is selected THE SYSTEM SHALL NOT save the schedule
+          c7: WHEN no delivery days are chosen THE SYSTEM SHALL default them to every day
+          c8: WHEN no delivery time is chosen THE SYSTEM SHALL default it to 08:00 in the subscriber's timezone
+          c9: WHEN the browser reports a recognised IANA timezone THE SYSTEM SHALL use it as the subscriber's timezone without asking
+          c10: IF the browser reports no timezone or an unrecognised one THE SYSTEM SHALL NOT save the schedule until the subscriber picks a timezone
+          c11: IF a schedule setting has a default THE SYSTEM SHALL NOT require the subscriber to answer it during onboarding
         next:
-          - {to: J4.S4, when: submitted}
+          - {to: J4.S4, when: schedule_set}
       - id: J4.S4
-        title: Save preferences and record delivery opt-in
+        title: Start digests and record delivery opt-in
         kind: system
-        decisions: [D22, D46]
+        decisions: [D22, D46, D99, D106]
         invariants: [I6]
         criteria:
           c1: WHEN preferences are saved THE SYSTEM SHALL record an explicit delivery opt-in with its timestamp
           c2: IF a subscriber has not given an explicit opt-in THE SYSTEM SHALL NOT mark them eligible for delivery
           c3: WHEN preferences are saved THE SYSTEM SHALL make them editable without repeating onboarding
+          c4: WHEN preferences are saved THE SYSTEM SHALL apply the constraint, schedule and opt-in changes to one preference row in a single transaction
+          c5: IF a concurrent save is in progress THE SYSTEM SHALL NOT persist a combination of the two that neither save submitted
+          c6: WHEN the start action is shown THE SYSTEM SHALL display the delivery schedule and digest size it will use with a way to change them
+          c7: WHEN the subscriber takes the start action THE SYSTEM SHALL record it as the explicit delivery opt-in
         exit: preferences_saved
     review:
       input:
@@ -390,8 +423,9 @@ journeys:
         reason: Saving preferences again updates the one preference record and its opt-in timestamp rather than creating a second subscription
         refs: [J4.S4.c1, J4.S4.c3]
       concurrency:
-        status: open
-        reason: Two sessions saving preferences could interleave a schedule change with an opt-in change. Recommend a single preference row updated transactionally
+        status: covered
+        reason: Under D99 constraints, schedule and opt-in are written to one preference row in a single transaction, so no save persists a combination neither writer submitted
+        refs: [J4.S4.c4, J4.S4.c5]
       recovery:
         status: covered
         reason: Delivery eligibility requires an explicit opt-in, so an incomplete run leaves nothing scheduled, and preferences stay editable afterwards
@@ -406,12 +440,14 @@ journeys:
       - id: J5.S1
         title: Select candidates from the shared catalogue
         kind: system
-        decisions: [D4, D37]
+        decisions: [D4, D37, D100]
         invariants: [I5]
         criteria:
           c1: WHEN a preview is requested THE SYSTEM SHALL read candidate openings from the shared catalogue rather than researching per subscriber
           c2: IF a row holds another subscriber's private profile or recommendation data THE SYSTEM SHALL NOT read it into this preview
           c3: WHEN the catalogue holds no openings for the subscriber's job families THE SYSTEM SHALL record that as the shortfall reason
+          c4: IF a preview run is interrupted before it returns THE SYSTEM SHALL NOT resume that run
+          c5: WHEN a preview is requested after an interrupted run THE SYSTEM SHALL recompute it from the catalogue and the confirmed profile
         next:
           - {to: J5.S2, when: candidates_found}
           - {exit: preview_empty, when: catalogue_empty}
@@ -443,13 +479,16 @@ journeys:
       - id: J5.S4
         title: Require current verified availability
         kind: system
-        decisions: [D7, D9, D48]
+        decisions: [D7, D9, D48, D101]
         invariants: [I1]
         criteria:
           c1: WHEN a candidate's last verification is older than the configured freshness window THE SYSTEM SHALL revalidate it before including it
           c2: IF a candidate is not classified verified_open THE SYSTEM SHALL NOT include it in the preview
           c3: WHEN revalidation is inconclusive THE SYSTEM SHALL classify the candidate uncertain and record the observed failure
           c4: WHEN a verification result is produced THE SYSTEM SHALL cache it against the opening so other subscribers reuse it
+          c5: WHEN a candidate needs revalidation THE SYSTEM SHALL acquire that opening's verification lease before verifying it
+          c6: IF another run holds that opening's verification lease THE SYSTEM SHALL NOT start a second verification of it
+          c7: WHEN a verification held elsewhere resolves THE SYSTEM SHALL read the cached result rather than producing its own
         next:
           - {to: J5.S5, when: survivors_remain}
           - {exit: preview_empty, when: none_verified_open}
@@ -490,8 +529,9 @@ journeys:
         reason: Private rows belonging to other subscribers are never read into a preview, while public catalogue rows are shared by design
         refs: [J5.S1.c1, J5.S1.c2]
       interruption:
-        status: open
-        reason: Whether a preview interrupted midway is resumed or recomputed is unspecified. Recommend recomputing, since a preview writes no delivery history until J7.S4
+        status: covered
+        reason: Under D100 an interrupted preview is recomputed rather than resumed, which is safe because a preview writes no delivery history, and the cached verification results keep the recomputation cheap
+        refs: [J5.S1.c4, J5.S1.c5, J5.S4.c4]
       dependencies:
         status: covered
         reason: An inconclusive revalidation yields the uncertain state and excludes the candidate instead of failing the preview or assuming closure
@@ -501,8 +541,9 @@ journeys:
         reason: Equivalent listings of one opening collapse to a single candidate and already-delivered openings are excluded at the exact-opening level
         refs: [J5.S3.c1, J5.S3.c2]
       concurrency:
-        status: open
-        reason: Two concurrent previews for one subscriber could both verify the same openings. Recommend a per-opening verification lease so the shared cache is written once
+        status: covered
+        reason: Under D101 revalidation takes a per-opening lease, so a second concurrent preview reads the cached result instead of verifying the same opening again
+        refs: [J5.S4.c5, J5.S4.c6, J5.S4.c7]
       recovery:
         status: covered
         reason: Every exhausted filter path reaches preview_empty with a recorded shortfall reason rather than an empty screen or a padded list
@@ -529,7 +570,7 @@ journeys:
       - id: J6.S2
         title: Fetch the employer's structured ATS feed
         kind: external
-        decisions: [D6, D7, D36]
+        decisions: [D6, D7, D36, D102]
         observations: [O4]
         invariants: []
         criteria:
@@ -538,6 +579,8 @@ journeys:
           c3: WHEN a feed responds THE SYSTEM SHALL record the canonical URL, source URL, requisition id and relevant description for each listing
           c4: IF a listing is known only from a directory or aggregator THE SYSTEM SHALL NOT classify it verified_open
           c5: WHEN the configured request budget for a run is exhausted THE SYSTEM SHALL stop fetching and record the run as partial
+          c6: WHEN a run is recorded partial THE SYSTEM SHALL record the employer cursor it reached
+          c7: WHEN a run starts after a partial run THE SYSTEM SHALL resume at the first employer not yet fetched rather than refetching the employers already recorded
         next:
           - {to: J6.S3, when: feed_usable}
           - {to: J6.S4, when: feed_missing_or_incomplete}
@@ -555,7 +598,7 @@ journeys:
       - id: J6.S4
         title: Verify selectively with the sandbox browser
         kind: system
-        decisions: [D3, D8, D11, D12, D33, D34, D36]
+        decisions: [D3, D8, D11, D12, D33, D34, D36, D101]
         observations: [O2, O3]
         invariants: [I1, I8, I9]
         criteria:
@@ -569,6 +612,8 @@ journeys:
           c8: IF a destination is outside the configured domain allow list or resolves to a private address THE SYSTEM SHALL NOT navigate to it
           c9: WHEN the configured page, runtime or browser-session budget is reached THE SYSTEM SHALL stop and record the outcome as uncertain
           c10: WHEN an ATS migration or changed URL is detected THE SYSTEM SHALL record the new location against the same opening
+          c11: WHEN an opening needs browser verification THE SYSTEM SHALL acquire that opening's verification lease, the same lease preview verification uses
+          c12: IF another run holds that opening's verification lease THE SYSTEM SHALL NOT spend browser budget verifying it again
         exit: catalogue_updated
     review:
       input:
@@ -592,11 +637,13 @@ journeys:
         reason: A refreshed update date on an unchanged requisition id does not create a second vacancy
         refs: [J6.S3.c2]
       concurrency:
-        status: open
-        reason: Concurrent catalogue runs could verify one opening twice and waste the browser budget. Recommend a per-opening verification lease shared with J5.S4
+        status: covered
+        reason: Under D101 catalogue verification takes the same per-opening lease that preview verification uses, so one opening is not verified twice out of the browser budget
+        refs: [J6.S4.c11, J6.S4.c12]
       recovery:
-        status: open
-        reason: Whether a partial run resumes at the unfetched employers or restarts is unspecified. Recommend resuming from a per-employer cursor so the budget is not re-spent
+        status: covered
+        reason: Under D102 a partial run records the employer cursor it reached and the next run resumes there, so the request budget is not re-spent on employers already recorded
+        refs: [J6.S2.c5, J6.S2.c6, J6.S2.c7]
 
   - id: J7
     title: Send a test email digest
@@ -644,7 +691,7 @@ journeys:
       - id: J7.S4
         title: Reconcile the send result
         kind: system
-        decisions: [D22, D23]
+        decisions: [D22, D23, D74, D103]
         observations: [O5]
         invariants: [I7]
         criteria:
@@ -652,6 +699,9 @@ journeys:
           c2: WHEN the provider result is unknown THE SYSTEM SHALL mark the send record uncertain
           c3: IF a send record is uncertain THE SYSTEM SHALL NOT retry it before reconciling against the provider
           c4: WHEN a digest is recorded sent THE SYSTEM SHALL add each included opening to the subscriber's delivery history
+          c5: WHEN reconciliation records a send as not delivered and the delivery grace window has not elapsed THE SYSTEM SHALL retry it under the same idempotency key
+          c6: IF the delivery grace window has elapsed THE SYSTEM SHALL NOT retry the send
+          c7: WHEN a send is abandoned after the grace window THE SYSTEM SHALL mark the record abandoned and fold its openings into the next scheduled digest
         exit: sent
     review:
       input:
@@ -679,5 +729,6 @@ journeys:
         reason: The idempotency key is persisted as the claim, so two concurrent sends resolve to one provider call and the loser exits suppressed
         refs: [J7.S2.c1, J7.S2.c2]
       recovery:
-        status: open
-        reason: Whether an uncertain send is eventually retried, abandoned or escalated after reconciliation is unspecified and depends on the missed-run policy open under Q7
+        status: covered
+        reason: Under D103 an uncertain send is reconciled first, retried under the same idempotency key while the D74 grace window holds, then abandoned with its openings folded into the next scheduled digest
+        refs: [J7.S4.c3, J7.S4.c5, J7.S4.c6, J7.S4.c7]
