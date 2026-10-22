@@ -77,7 +77,7 @@ coverage:
     actor: subscriber
     goal: Receive digests automatically on a recurring schedule in their own timezone
     status: unresolved
-    reason: Deferred to stage 3. Schedule-change, missed-run and retry policy is open under Q7, and the dispatcher design is draft under D50
+    reason: Deferred to stage 3. Policy is now accepted under D50, D74, D75 and D76; the journey is not yet mapped
   - id: C10
     actor: subscriber
     goal: Pause, resume or unsubscribe from delivery
@@ -92,17 +92,17 @@ coverage:
     actor: subscriber
     goal: See a relevant verified hiring contact for a recommendation
     status: unresolved
-    reason: Accepted as policy under D25 and D26 but its inclusion in the first shippable version is open under Q9
+    reason: Deferred until verification and ranking are trustworthy under D73
   - id: C13
     actor: subscriber
     goal: Delete their account and stored data
     status: unresolved
-    reason: Accepted as policy under D35 but retention periods are open under Q11
+    reason: Retention is accepted under D59; the deletion journey is not yet mapped
   - id: C14
     actor: operator
     goal: Expand employer coverage beyond the seed set
     status: unresolved
-    reason: Expansion mechanism and approval owner are open under Q12. J6.S1 admits only an owner-seeded registry
+    reason: Continuous discovery is a stage 1 goal under D61 and D63, with automated admission under D64 and a separate budget under D66. J6 must be extended to map it before stage 1 is ready
 
 journeys:
   - id: J1

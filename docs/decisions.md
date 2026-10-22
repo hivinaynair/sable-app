@@ -110,6 +110,8 @@ not approved policy; they move into the journey spine as O IDs.
 | D53 | accepted | v1 covers three job families: software engineering, design and product management. Each family has its own relevance configuration and onboarding question branch; a given user targets the families they select | Owner answer to Q1 | A single narrow segment: rejected by owner | Owner answer | 2026-10-21 | |
 | D54 | accepted | Greenfield repository, scaffolded fresh. No existing Clerk, Postgres or Vercel project is assumed | Owner answer to Q2 | Building inside an existing app: not applicable | Owner answer | 2026-10-21 | |
 | D55 | accepted | Total running cost stays under 20 USD per month during v1, dev-only usage. Caps on employer-set size, pages visited, browser sessions, model calls and concurrency are enforced in code and fail closed when exceeded | Owner answer to Q3; makes D36 concrete | A higher ceiling: rejected by owner for v1 | Owner answer | 2026-10-21 | |
+| D78 | accepted | The owner labels the first golden fixture corpus, around 30 to 50 items, so the definition of a good match is owner-set. The implementer captures and prepares the fixtures, including feed responses, careers pages, resumes and the adversarial cases. The corpus is refreshed quarterly or whenever the ranking changes, and this labelled set is the calibration sample that D77 requires before judge evals can block | Owner answer to Q16; avoids the implementer encoding their own taste and then measuring against it | Splitting labels by type, implementer labelling with spot-checks, or waiting for user feedback: all rejected by owner | Owner answer | 2026-10-22 | |
+| D77 | accepted | Judge-graded evals warn but do not block a merge until the judge has been calibrated against an owner-labelled sample and shown to agree with it; after that they block. Deterministic tests and deterministic eve eval assertions block from the start regardless | Owner answer to Q15; avoids gating merges on a judge not yet shown to be right, while hard rules stay enforced | Blocking from the start, blocking only at release, or never blocking: all rejected by owner | Owner answer | 2026-10-22 | |
 | D76 | accepted | v1 supports daily, weekday-only and selected-day delivery. The schedule stores a set of weekdays plus the local time and IANA timezone of D19, and the delivery day is evaluated in the subscriber's own timezone, never as the UTC day. The missed-run grace window of D74 and the per-date idempotency key of D75 apply per selected delivery day | Owner answer to Q8; a feature many job-seekers use, and the timezone day-boundary cases are tested directly rather than deferred | A stored day set with daily-only UI, daily only with a later migration, or a weekdays-only toggle: all rejected by owner | Owner answer | 2026-10-22 | D20 |
 | D74 | accepted | A missed or interrupted scheduled run is sent late if it recovers within a grace window, defaulting to 6 hours after the scheduled local delivery time. Past the window the digest is skipped and its unsent matches fold into the next scheduled digest, still subject to freshness and the no-repeat rule. The 6 hour figure was offered as an example in the question and can be changed without changing the policy | Owner answer to Q7; a short delay is better than a lost day, while a digest arriving many hours late reads as stale and risks two digests close together | Always sending late, always dropping, or dropping with a notice in the next digest: all rejected by owner | Owner answer | 2026-10-22 | |
 | D75 | accepted | The send idempotency key of D22 is derived from the subscriber and the scheduled local delivery date, so a late send, a retry of the same scheduled day and the next day's run can never collide or double-send. Folded matches are claimed by the next date's key, not the missed one | Follows from D74 combined with the at-least-once dispatch observed in O5 | A key derived from the run attempt: rejected, a retry would mint a new key and double-send | Implementer derivation from D74 and D22 | 2026-10-22 | |
@@ -161,22 +163,23 @@ not approved policy; they move into the journey spine as O IDs.
 | Q12 | resolved | Answered by D64 | Owner chose a fully automated gate with no human in the loop | Bidirectional link with a confidence score and an owner review queue; auto-admit with a quarantine state; owner approval of every employer | Owner answer | 2026-10-22 | |
 | Q13 | resolved | Answered by D72 | Owner chose software engineering first | Product management first; design first; a shared skeleton with no family tuned | Owner answer | 2026-10-22 | |
 | Q14 | resolved | Answered by D61 and D62. The question was wrongly framed: it treated employer count as the coverage limit | Owner rejected a fixed registry size as the coverage model | A fixed seed size as the cap | Owner answer | 2026-10-22 | |
-| Q15 | open | What eval score thresholds gate a release, and does a failing judge-graded eval block a merge or only warn? | Owner answers; blocks CI gating. Recommend warn-only until judge agreement has been checked against a human-labelled sample | Hard block from the start | Arises from the eval plan | 2026-10-21 | |
-| Q16 | open | Who labels the golden fixture corpus ground truth, and how often is it refreshed? | Owner answers; blocks the layer 2 corpus. Recommend the owner labels the first corpus so a good match is owner-defined rather than implementer-defined | Implementer labels it | Arises from the eval plan | 2026-10-21 | |
+| Q15 | resolved | Answered by D77 | Owner chose warn-only until the judge is calibrated | Block from the start; block only at release; never block | Owner answer | 2026-10-22 | |
+| Q16 | resolved | Answered by D78 | Owner will label the first corpus | Splitting mechanical and judgement labels; implementer labels with owner spot-checks; waiting for real user feedback | Owner answer | 2026-10-22 | |
 | Q17 | resolved | Answered by D67 | Owner chose the subscriber's own configured digest size as the target | A fixed floor for all users; measure without targeting; track a trend rather than a level | Owner answer | 2026-10-22 | |
 | Q18 | resolved | Answered by D66 | Owner chose separate budgets with discovery pausing first | One shared budget with verification prioritised; a registry size cap; demand-driven discovery only on shortfall | Owner answer | 2026-10-22 | |
 
 ## Accepted scope and next action
 
-Ready to map: the thin flow the owner named — Clerk sign-in, résumé upload and
-reviewed profile, preferences, a small real job catalogue, ranked preview, test email.
-Policy for it is accepted under D1 to D49, with D50 to D52 as implementer drafts.
+All product questions Q1 to Q18 are resolved as of 2026-10-22. No open Q rows remain.
 
-Blocked: the empty-digest branch depends on Q5, the freshness window on Q6, the
-missed-run branch on Q7, contact enrichment on Q9, the email provider on Q10,
-retention on Q11, registry expansion on Q12, the first relevance configuration on
-Q13 and the seed employer count on Q14. Q1 to Q3 are resolved by D53 to D56.
+Still open, and owned by the implementer rather than the owner: nine branch
+reviews in docs/journeys/thin-flow.yaml, and two verification debts, namely the
+ATS endpoint shapes of O4 and the open-source tool licences in docs/evals-plan.md,
+both taken from secondary sources and to be re-verified before anything depends
+on them.
 
-Next action: the thin flow is mapped in docs/journeys/thin-flow.yaml. Implement
-stage 1 against it. Q4 to Q14 are answerable as the stages reach them and none of
-them block stage 1. Planning adds no authorisation to provision, deploy or commit.
+Known spine work: continuous discovery under D61 to D66 is a stage 1 goal, so
+coverage goal C14 must be mapped by extending J6 before stage 1 is ready.
+
+Next action: scaffold stage 1. Planning adds no authorisation to provision,
+deploy or commit beyond what the owner has approved.

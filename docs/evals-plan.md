@@ -188,11 +188,7 @@ not inspect its assertions, so a linked test is not proof of behaviour.
   and the verification map with `--require-links`.
 - Stage 4: layer 5 adversarial suite, with Garak mined for payloads.
 
-## Open questions this raises
+## Settled questions
 
-- Q15: What score thresholds gate a release, and does a failing judge eval block a
-  merge or only warn? Recommend warn-only until we have checked judge agreement against
-  a human-labelled sample.
-- Q16: Who labels the golden corpus ground truth, and how often is it refreshed as
-  real listings change? Recommend the owner labels the first corpus so the definition
-  of a good match is owner-set rather than implementer-set.
+- Judge-graded evals warn until calibrated, then block (D77).
+- The owner labels the first corpus, which doubles as the judge calibration sample (D78).

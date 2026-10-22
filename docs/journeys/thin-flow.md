@@ -33,12 +33,12 @@ Descriptive evidence only. Observations are not approved decisions.
 | C6 | operator: Build and verify the shared job catalogue from a seed employer set | mapped | J6 |
 | C7 | subscriber: Receive a test email digest | mapped | J7 |
 | C8 | subscriber: Resume onboarding after closing the tab or losing a response | mapped | J2, J3, J4 |
-| C9 | subscriber: Receive digests automatically on a recurring schedule in their own timezone | unresolved | Deferred to stage 3. Schedule-change, missed-run and retry policy is open under Q7, and the dispatcher design is draft under D50 |
+| C9 | subscriber: Receive digests automatically on a recurring schedule in their own timezone | unresolved | Deferred to stage 3. Policy is now accepted under D50, D74, D75 and D76; the journey is not yet mapped |
 | C10 | subscriber: Pause, resume or unsubscribe from delivery | unresolved | Accepted as policy under D46 but not mapped in the thin flow. J7.S1 reads the states; the subscriber-facing controls arrive in stage 3 |
 | C11 | subscriber: Mark a job interested, not relevant, already applied or already contacted | unresolved | Accepted as policy under D44 but deferred to stage 4. J5.S3 consumes these marks once they exist |
-| C12 | subscriber: See a relevant verified hiring contact for a recommendation | unresolved | Accepted as policy under D25 and D26 but its inclusion in the first shippable version is open under Q9 |
-| C13 | subscriber: Delete their account and stored data | unresolved | Accepted as policy under D35 but retention periods are open under Q11 |
-| C14 | operator: Expand employer coverage beyond the seed set | unresolved | Expansion mechanism and approval owner are open under Q12. J6.S1 admits only an owner-seeded registry |
+| C12 | subscriber: See a relevant verified hiring contact for a recommendation | unresolved | Deferred until verification and ranking are trustworthy under D73 |
+| C13 | subscriber: Delete their account and stored data | unresolved | Retention is accepted under D59; the deletion journey is not yet mapped |
+| C14 | operator: Expand employer coverage beyond the seed set | unresolved | Continuous discovery is a stage 1 goal under D61 and D63, with automated admission under D64 and a separate budget under D66. J6 must be extended to map it before stage 1 is ready |
 
 Inventory completeness and the meaning of each mapping require review.
 
