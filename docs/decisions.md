@@ -51,6 +51,24 @@ not approved policy; they move into the journey spine as O IDs.
   All unauthenticated, none support server-side search. **Unverified against primary
   docs — must be re-verified in the dev environment before the catalogue is built.**
 
+## Reference product: Matcha.fm (observed 2026-10-22)
+
+The owner's goal is a better version of [matcha.fm](https://matcha.fm/). Observed
+from its own site copy via search results only. matcha.fm itself was unreachable
+from this container, and no independent reviews or pricing were found. These are
+its marketing claims, not verified facts. matcha.ai is a separate, unrelated
+swipe-to-apply product.
+
+- A subscriber describes their ideal role once and receives one daily email of
+  matching roles ("one zero noise email with only the roles that really fit").
+- Scope is fully remote roles at VC-backed startups, seed to Series C.
+- Claimed reach is 10k to 15k+ "under the radar" roles across 40+ countries, for
+  engineers, PMs, designers and marketers.
+- Its public copy found so far makes no claim about re-checking that a role is
+  still open, explaining fit and gaps, checking eligibility such as sponsorship
+  or remote-country limits, preventing repeats, or naming hiring contacts. Absence
+  from marketing copy does not prove the product lacks these.
+
 ## Decisions
 
 | ID | Status | Decision | Why | Alternatives | Source | Date | Supersedes |
@@ -110,6 +128,9 @@ not approved policy; they move into the journey spine as O IDs.
 | D53 | accepted | v1 covers three job families: software engineering, design and product management. Each family has its own relevance configuration and onboarding question branch; a given user targets the families they select | Owner answer to Q1 | A single narrow segment: rejected by owner | Owner answer | 2026-10-21 | |
 | D54 | accepted | Greenfield repository, scaffolded fresh. No existing Clerk, Postgres or Vercel project is assumed | Owner answer to Q2 | Building inside an existing app: not applicable | Owner answer | 2026-10-21 | |
 | D55 | accepted | Total running cost stays under 20 USD per month during v1, dev-only usage. Caps on employer-set size, pages visited, browser sessions, model calls and concurrency are enforced in code and fail closed when exceeded | Owner answer to Q3; makes D36 concrete | A higher ceiling: rejected by owner for v1 | Owner answer | 2026-10-21 | |
+| D81 | accepted | sable is positioned as a better alternative to Matcha.fm. Better is defined by the trust properties already in this record rather than by breadth: a role is verified still open before it is sent, fit and material gaps are explained from the confirmed profile, hard eligibility such as sponsorship and remote-country limits is enforced, and no opening is sent twice. Breadth cannot compete with Matcha's claimed 10k+ roles under the ceiling of D55, and is not the claim | Owner request, 2026-10-22, combined with the original brief's emphasis on trustworthy research | Competing on catalogue size: not achievable inside D55 | Owner request | 2026-10-22 | |
+| D82 | accepted | sable covers the broader market of the original brief: remote, hybrid and on-site roles at companies of any stage, not only Matcha's niche of remote VC-backed startups. Work arrangement and company stage stay subscriber preferences, and any geographic restriction stays a hard constraint per D42 | Owner answer, 2026-10-22 | Matching Matcha's remote-startup niche, starting there and broadening later, or startups with any work arrangement: all rejected by owner | Owner answer | 2026-10-22 | |
+| D83 | accepted | Because larger employers often use applicant tracking systems other than Greenhouse, Lever and Ashby, the extraction layer is built as one adapter per ATS behind a common interface. Further adapters are added only for systems with a public structured job endpoint verified against primary documentation, and employers on systems without one, such as many Workday tenants, fall to the selective browser path of D8 and the cost limits of D66 | Implementer, builder-owned internal choice following D82; widening the market without adapters would push most large employers onto the expensive browser path | A fixed three-ATS design: rejected, it cannot serve the market of D82 within D55 | Implementer, builder-owned internal choice | 2026-10-22 | |
 | D79 | accepted | The project doubles as a way for the owner to learn to build AI agents and to write evals properly. Transferable lessons are part of the deliverable, not a side effect | Owner request, 2026-10-22 | Product only: rejected by owner | Owner request | 2026-10-22 | |
 | D80 | accepted | Learning happens by building first at normal pace and keeping a running LEARNING.md of the transferable lessons for each stage: the patterns used, the mistakes made and caught, and the eval techniques, each pointing at the code or decision that shows it | Owner answer; fastest route to a working product, with the lessons captured where they happened | The owner writing key parts with coaching, explaining every decision as it is built, or pairing with deliberate breakage: all rejected by owner | Owner answer | 2026-10-22 | |
 | D78 | accepted | The owner labels the first golden fixture corpus, around 30 to 50 items, so the definition of a good match is owner-set. The implementer captures and prepares the fixtures, including feed responses, careers pages, resumes and the adversarial cases. The corpus is refreshed quarterly or whenever the ranking changes, and this labelled set is the calibration sample that D77 requires before judge evals can block | Owner answer to Q16; avoids the implementer encoding their own taste and then measuring against it | Splitting labels by type, implementer labelling with spot-checks, or waiting for user feedback: all rejected by owner | Owner answer | 2026-10-22 | |
