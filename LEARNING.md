@@ -54,3 +54,33 @@ bad ones through, and it does both with a confident-looking number.
 Coverage is measured as fresh, verified, relevant openings per user, against the
 digest size that user chose (D62, D67). The number of companies tracked is a cost,
 not a result. Measuring activity makes a pipeline look busy while it fails people.
+
+## Stage 1, increment 1: the rules before the agent
+
+**9. Keep the agent's judgements out of your rules.**
+`packages/core` has no model calls at all. The agent and Jev will produce
+*inputs*, such as "sponsorship: not_stated" or a relevance score, and pure functions
+decide what happens next. That's why 53 tests run in half a second with no API key,
+and why the most important promises (never pad, never repeat, never send an
+unverified job) can be proven rather than hoped for. See
+`packages/core/src/digest.ts` and `packages/core/src/availability.ts`.
+
+**10. Name each test after the rule it proves.**
+Every test title starts with a rule ID such as `J5.S2.c2`.
+`scripts/gen-verification.mjs` turns those names into `docs/verification.json`, and
+the journeys checker confirms every link resolves. Today 27 of 114 rules have a
+test. Read that number as a coverage map: the missing 87 are the parts not built
+yet, and the gap is visible rather than guessed.
+
+**11. Test the edge cases the brief named, literally.**
+The brief said a 403, CAPTCHA, blank page or single 404 is not proof of closure.
+There's one test case for each (`availability.test.ts`). It said remote doesn't
+mean worldwide, and the owner's own example (on-site in Singapore or Hong Kong,
+with sponsorship) is the fixture for the eligibility tests. The daylight-saving
+tests use real transition dates in London and New York. If a requirement is worth
+writing down, it's worth one test with its exact wording.
+
+**12. "Passed" isn't evidence until you've seen the count.**
+Turborepo reported both tasks successful while showing only errors. A suite that
+ran zero tests would have looked identical, so I re-ran it to see "53 passed". Get
+in the habit of checking the number, not just the colour.

@@ -1,0 +1,236 @@
+{
+  "I2": [
+    {
+      "path": "../packages/core/tests/digest.test.ts",
+      "locator": "I2 never returns the same opening twice when it arrives from two sources"
+    }
+  ],
+  "J4.S3.c2": [
+    {
+      "path": "../packages/core/tests/schedule.test.ts",
+      "locator": "J4.S3.c2 delivers at the subscriber's local time, not UTC"
+    },
+    {
+      "path": "../packages/core/tests/schedule.test.ts",
+      "locator": "J4.S3.c2 keeps the same local time across a daylight-saving change"
+    },
+    {
+      "path": "../packages/core/tests/schedule.test.ts",
+      "locator": "J4.S3.c2 moves a local time that does not exist on a spring-forward day past the gap"
+    },
+    {
+      "path": "../packages/core/tests/schedule.test.ts",
+      "locator": "J4.S3.c2 fires once on a fall-back day when the local time occurs twice"
+    }
+  ],
+  "J4.S3.c3": [
+    {
+      "path": "../packages/core/tests/schedule.test.ts",
+      "locator": "J4.S3.c3 rejects a timezone that is not a valid IANA identifier"
+    }
+  ],
+  "J4.S3.c5": [
+    {
+      "path": "../packages/core/tests/schedule.test.ts",
+      "locator": "J4.S3.c5 evaluates weekdays in the subscriber's timezone, not as the UTC day"
+    }
+  ],
+  "J4.S3.c6": [
+    {
+      "path": "../packages/core/tests/schedule.test.ts",
+      "locator": "J4.S3.c6 rejects a schedule with no delivery days"
+    }
+  ],
+  "J5.S2.c1": [
+    {
+      "path": "../packages/core/tests/eligibility.test.ts",
+      "locator": "J5.S2.c1 admits an on-site Singapore role that explicitly offers sponsorship"
+    },
+    {
+      "path": "../packages/core/tests/eligibility.test.ts",
+      "locator": "J5.S2.c1 excludes an on-site role outside the requested countries"
+    },
+    {
+      "path": "../packages/core/tests/eligibility.test.ts",
+      "locator": "J5.S2.c1 excludes an employer the subscriber excluded"
+    }
+  ],
+  "J5.S2.c2": [
+    {
+      "path": "../packages/core/tests/eligibility.test.ts",
+      "locator": "J5.S2.c2 excludes not-stated sponsorship by default rather than treating it as offered"
+    },
+    {
+      "path": "../packages/core/tests/eligibility.test.ts",
+      "locator": "J5.S2.c2 shows not-stated sponsorship only on opt-in, and labels it unknown"
+    },
+    {
+      "path": "../packages/core/tests/eligibility.test.ts",
+      "locator": "J5.S2.c2 always excludes a role that explicitly does not sponsor, even with the opt-in"
+    },
+    {
+      "path": "../packages/core/tests/eligibility.test.ts",
+      "locator": "J5.S2.c2 excludes an unknown work arrangement when the subscriber restricts arrangement"
+    }
+  ],
+  "J5.S2.c3": [
+    {
+      "path": "../packages/core/tests/eligibility.test.ts",
+      "locator": "J5.S2.c3 does not treat remote with no stated region as worldwide"
+    },
+    {
+      "path": "../packages/core/tests/eligibility.test.ts",
+      "locator": "J5.S2.c3 applies a stated remote restriction to the subscriber's countries"
+    },
+    {
+      "path": "../packages/core/tests/eligibility.test.ts",
+      "locator": "J5.S2.c3 admits a remote role only when worldwide is explicitly stated"
+    }
+  ],
+  "J5.S3.c1": [
+    {
+      "path": "../packages/core/tests/digest.test.ts",
+      "locator": "J5.S3.c1 removes openings already delivered to the subscriber"
+    }
+  ],
+  "J5.S3.c2": [
+    {
+      "path": "../packages/core/tests/identity.test.ts",
+      "locator": "J5.S3.c2 collapses one opening found through two sources into one candidate, keeping both sources"
+    },
+    {
+      "path": "../packages/core/tests/identity.test.ts",
+      "locator": "J5.S3.c2 falls back to a normalised canonical URL when no requisition id is published"
+    },
+    {
+      "path": "../packages/core/tests/identity.test.ts",
+      "locator": "J5.S3.c2 prefers verified-open evidence over uncertain when collapsing"
+    }
+  ],
+  "J5.S3.c3": [
+    {
+      "path": "../packages/core/tests/digest.test.ts",
+      "locator": "J5.S3.c3 keeps a different requisition at an employer the subscriber already applied to, and labels it"
+    },
+    {
+      "path": "../packages/core/tests/identity.test.ts",
+      "locator": "J5.S3.c3 treats a different requisition at the same employer as a different opening"
+    }
+  ],
+  "J5.S3.c4": [
+    {
+      "path": "../packages/core/tests/digest.test.ts",
+      "locator": "J5.S3.c4 labels a reopened role rather than suppressing it"
+    }
+  ],
+  "J5.S4.c1": [
+    {
+      "path": "../packages/core/tests/availability.test.ts",
+      "locator": "J5.S4.c1 trusts feed evidence for 48 hours"
+    },
+    {
+      "path": "../packages/core/tests/availability.test.ts",
+      "locator": "J5.S4.c1 trusts browser evidence for 24 hours"
+    },
+    {
+      "path": "../packages/core/tests/availability.test.ts",
+      "locator": "J5.S4.c1 re-checks an uncertain opening every run regardless of age"
+    },
+    {
+      "path": "../packages/core/tests/availability.test.ts",
+      "locator": "J5.S4.c1 re-checks an opening that has never been verified"
+    }
+  ],
+  "J5.S4.c2": [
+    {
+      "path": "../packages/core/tests/digest.test.ts",
+      "locator": "J5.S4.c2 includes only verified-open openings within their freshness window"
+    }
+  ],
+  "J5.S5.c5": [
+    {
+      "path": "../packages/core/tests/digest.test.ts",
+      "locator": "J5.S5.c5 drops a candidate whose relevance output failed validation and so has no score"
+    }
+  ],
+  "J5.S6.c1": [
+    {
+      "path": "../packages/core/tests/digest.test.ts",
+      "locator": "J5.S6.c1 returns only the surviving matches and reports a shortfall against the subscriber's target"
+    }
+  ],
+  "J5.S6.c2": [
+    {
+      "path": "../packages/core/tests/digest.test.ts",
+      "locator": "J5.S6.c2 never pads to reach the target with openings that failed a filter"
+    }
+  ],
+  "J6.S2.c2": [
+    {
+      "path": "../packages/core/tests/availability.test.ts",
+      "locator": "J6.S2.c2 does not close a listing missing from a partial feed response"
+    }
+  ],
+  "J6.S3.c2": [
+    {
+      "path": "../packages/core/tests/identity.test.ts",
+      "locator": "J6.S3.c2 keeps one identity when only the update date changes"
+    }
+  ],
+  "J6.S3.c3": [
+    {
+      "path": "../packages/core/tests/availability.test.ts",
+      "locator": "J6.S3.c3 classifies a listing present in the employer's feed as verified open from feed evidence"
+    }
+  ],
+  "J6.S3.c4": [
+    {
+      "path": "../packages/core/tests/availability.test.ts",
+      "locator": "J6.S3.c4 classifies a listing absent from a complete feed as confirmed closed"
+    }
+  ],
+  "J6.S4.c3": [
+    {
+      "path": "../packages/core/tests/availability.test.ts",
+      "locator": "J6.S4.c3 treats a login-gated application form as uncertain, not open"
+    },
+    {
+      "path": "../packages/core/tests/availability.test.ts",
+      "locator": "J6.S4.c3 classifies an inspected application form for the matching requisition as verified open from browser evidence"
+    },
+    {
+      "path": "../packages/core/tests/availability.test.ts",
+      "locator": "J6.S4.c3 classifies a closure notice for the matching requisition as confirmed closed"
+    }
+  ],
+  "J6.S4.c4": [
+    {
+      "path": "../packages/core/tests/availability.test.ts",
+      "locator": "J6.S4.c4 does not classify an Apply button alone as verified open"
+    }
+  ],
+  "J6.S4.c7": [
+    {
+      "path": "../packages/core/tests/availability.test.ts",
+      "locator": "J6.S4.c7 never classifies %s as confirmed closed"
+    }
+  ],
+  "J6.S4.c10": [
+    {
+      "path": "../packages/core/tests/availability.test.ts",
+      "locator": "J6.S4.c10 does not trust a page whose requisition does not match, such as a redirect to another role"
+    }
+  ],
+  "J7.S2.c1": [
+    {
+      "path": "../packages/core/tests/delivery.test.ts",
+      "locator": "J7.S2.c1 derives different keys for different scheduled days and different subscribers"
+    }
+  ],
+  "J7.S2.c2": [
+    {
+      "path": "../packages/core/tests/delivery.test.ts",
+      "locator": "J7.S2.c2 derives the same key for a retry or late send of the same scheduled day"
+    }
+  ]
+}
