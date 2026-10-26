@@ -8,7 +8,8 @@ explaining its fit and its gaps, and none of which they have been sent before.
 
 Scope of this record: v1 of the product described in the owner brief of 2026-10-21.
 Authority: the product owner (brief author) owns product policy. The implementer owns
-internal technical choices and records them here as draft until confirmed.
+internal technical choices. Historical builder choices remain identified by their
+Source; new implementation mechanics belong in task plans, not owner-policy questions.
 
 ## Verification performed 2026-10-21
 
@@ -158,8 +159,20 @@ swipe-to-apply product.
 | D108 | accepted | Repeat detection is a tri-state per opening: new, previously sent, or possibly seen. Possibly seen applies when the subscriber's application history under D18 names the same employer and a similar role but carries no requisition id or exact URL to confirm it. Evidence is ordered: the same ATS and requisition id is the same posting; the same normalised direct URL is strong evidence of the same posting; the same employer, title and location without an id is possibly seen; different requisition ids are distinct postings. Previously sent, previously applied and previously contacted stay separate. A possibly seen opening is still sent, labelled as a possible repeat, never silently dropped | D17 dedups at exact-opening level, but user-entered history often has no requisition id, which collapsed to new or seen and hid the uncertainty from the subscriber | Treating an id-less history row as a confirmed match; ignoring id-less rows | Owner comparison with an existing research agent | 2026-10-23 | |
 | D109 | accepted | Every opening carries a funnel record: discovered, official source resolved, verified live, eligible, suitable, not previously sent, delivered. Each opening records the furthest stage it reached and, at the stage it stopped, a reason for rejection or an unresolved state. The D62 and D67 counts are derived from this record rather than kept separately | Without a per-opening reason, rejection causes, conversion between stages and the source of a shortfall cannot be measured, and the D68 shortfall message has nothing to cite | Counting only delivered openings; logging free-text reasons without stages | Owner comparison with an existing research agent | 2026-10-23 | |
 | D110 | accepted | Every run records search calls, page fetches, browser actions, model calls, retries, elapsed time and cache hits. The caps of D36 and D55 are enforced against these counters, not against estimates | Cost caps set without measured counts are guesses; the comparison agent could report no historical totals for any of these | Measuring only spend from provider invoices; estimating per-run cost | Owner comparison with an existing research agent | 2026-10-23 | |
-| D111 | accepted | A redirect from a role URL to a general careers page, or an HTTP 200 without the role's substantive description and application route, is uncertain under D9, not closed. Before deciding, the employer's board is searched for the requisition. An opening is confirmed_closed only on an explicit statement that it is removed, not found or no longer accepting applications | D9 named timeouts, 403s, CAPTCHAs, blank pages and single 404s but not generic redirects or empty 200 responses, both of which recur on employer careers pages | Treating a redirect as closure; treating any 200 as live | Owner comparison with an existing research agent | 2026-10-23 | |
+| D111 | accepted | A redirect from a role URL to a general careers page, or an HTTP 200 without the role's substantive description and application route, is uncertain under D9, not closed. Before deciding, the employer's board is searched for the requisition. On page verification, an opening is confirmed_closed only on an explicit statement that it is removed, not found or no longer accepting applications; absence from a successful full feed response stays closure evidence | D9 named timeouts, 403s, CAPTCHAs, blank pages and single 404s but not generic redirects or empty 200 responses, both of which recur on employer careers pages | Treating a redirect as closure; treating any 200 as live | Owner comparison with an existing research agent | 2026-10-23 | |
 | D112 | accepted | A reapplication restriction stated on an application form, for example no reapplying to the same role within 90 days, is recorded with the visible form questions of D27 and applied in the repeat check of D108. An opening that the restriction would block given the subscriber's history is labelled as such, not silently dropped | A form-stated restriction is an employer rule the profile cannot reveal, and the subscriber needs to see it before spending effort on an application | Ignoring form restrictions; excluding the whole employer | Owner comparison with an existing research agent | 2026-10-23 | |
+| D113 | accepted | Hard constraints can be conditional on location. The structured output of D85 holds per-location constraint groups, each with its own eligibility, sponsorship and salary rules, and an opening is checked against the group for its location. Relocation sponsorship is an evidence state separate from visa sponsorship under D86, with offered_explicitly, explicitly_not_offered and not_stated. Where a group sets a strict salary floor, undisclosed pay fails it, and a published range passes only when its lower bound meets the floor in annual base excluding bonus and equity; a range that straddles the floor goes to a separate needs-salary-confirmation group outside qualified matches | Owner answer to Q22. A single global constraint set cannot express a salary floor for one region alongside sponsored relocation to others, and relocation support is offered and stated differently from a work visa | Keep global constraints; fold relocation into visa sponsorship; let a straddling range pass with a caveat | Owner answer | 2026-10-26 | |
+| D114 | accepted | After sign-in, normal onboarding has three screens: résumé, describe the desired job, and matches. Preview results precede the optional digest-start action. | Keep onboarding simple while preserving matching accuracy and consent | A fixed questionnaire or mandatory settings wizard | Owner approval of simple onboarding flow | 2026-10-26 | |
+| D115 | accepted | Résumé extraction and its one-glance confirmation share one screen. Editing is optional; professional experience, skills and projects stay distinguishable. | Keep onboarding simple while preserving matching accuracy and consent | A fixed questionnaire or mandatory settings wizard | Owner approval of simple onboarding flow | 2026-10-26 | |
+| D116 | accepted | Ask “What kind of job are you looking for?” in one natural-language input with an example; show the interpretation as an editable summary and chips. | Keep onboarding simple while preserving matching accuracy and consent | A fixed questionnaire or mandatory settings wizard | Owner approval of simple onboarding flow | 2026-10-26 | |
+| D117 | accepted | Ask follow-up questions only for missing information affecting eligibility. Never repeat résumé or prior answers; clarify unrecognised requirements instead of guessing. | Keep onboarding simple while preserving matching accuracy and consent | A fixed questionnaire or mandatory settings wizard | Owner approval of simple onboarding flow | 2026-10-26 | |
+| D118 | accepted | Use editable suggestions for target roles, location search for desired work locations, and Remote/Hybrid/On-site choices. Ask where remote work will be performed when missing. | Keep onboarding simple while preserving matching accuracy and consent | A fixed questionnaire or mandatory settings wizard | Owner approval of simple onboarding flow | 2026-10-26 | |
+| D119 | accepted | For relevant locations, ask work authorisation using Already authorised / Need sponsorship / Not sure. Unknown authorisation never becomes assumed eligibility. | Keep onboarding simple while preserving matching accuracy and consent | A fixed questionnaire or mandatory settings wizard | Owner approval of simple onboarding flow | 2026-10-26 | |
+| D120 | accepted | Where relocation matters, ask whether employer relocation support is Required or Not required, separately from visa sponsorship. | Keep onboarding simple while preserving matching accuracy and consent | A fixed questionnaire or mandatory settings wizard | Owner approval of simple onboarding flow | 2026-10-26 | |
+| D121 | accepted | Salary is optional: amount, currency, month/year, and Must meet / Prefer. Location-specific Must meet floors follow D113; Prefer affects ranking. | Keep onboarding simple while preserving matching accuracy and consent | A fixed questionnaire or mandatory settings wizard | Owner approval of simple onboarding flow | 2026-10-26 | |
+| D122 | accepted | Keep optional industry, company and other ranking preferences under More preferences. Offer “Already applied to some jobs?” after results; history is not required for onboarding. | Keep onboarding simple while preserving matching accuracy and consent | A fixed questionnaire or mandatory settings wizard | Owner approval of simple onboarding flow | 2026-10-26 | |
+| D123 | accepted | On the matches screen, offer Start digests beside the default schedule and size, with optional Change controls. Schedule configuration never requires another onboarding screen. | Keep onboarding simple while preserving matching accuracy and consent | A fixed questionnaire or mandatory settings wizard | Owner approval of simple onboarding flow | 2026-10-26 | |
+| D124 | accepted | Finding or previewing matches never changes standing digest criteria or grants email opt-in. Start digests explicitly saves the shown criteria and delivery settings with opt-in. | Keep onboarding simple while preserving matching accuracy and consent | A fixed questionnaire or mandatory settings wizard | Owner approval of simple onboarding flow | 2026-10-26 | |
 | D79 | accepted | The project doubles as a way for the owner to learn to build AI agents and to write evals properly. Transferable lessons are part of the deliverable, not a side effect | Owner request, 2026-10-22 | Product only: rejected by owner | Owner request | 2026-10-22 | |
 | D80 | accepted | Learning happens by building first at normal pace and keeping a running LEARNING.md of the transferable lessons for each stage: the patterns used, the mistakes made and caught, and the eval techniques, each pointing at the code or decision that shows it | Owner answer; fastest route to a working product, with the lessons captured where they happened | The owner writing key parts with coaching, explaining every decision as it is built, or pairing with deliberate breakage: all rejected by owner | Owner answer | 2026-10-22 | |
 | D78 | accepted | The owner labels the first golden fixture corpus, around 30 to 50 items, so the definition of a good match is owner-set. The implementer captures and prepares the fixtures, including feed responses, careers pages, resumes and the adversarial cases. The adversarial set includes these observed cases: an aggregator label of worldwide contradicted by an official North America restriction; a role requiring a language the profile does not establish; a form forbidding reapplication within 90 days after a prior application; a prior receipt with the same title and no requisition id; an aggregator card describing one company while linking to a namesake's job board; and a discoverable role whose official page says it was removed. The corpus is refreshed quarterly or whenever the ranking changes, and this labelled set is the calibration sample that D77 requires before judge evals can block | Owner answer to Q16; avoids the implementer encoding their own taste and then measuring against it | Splitting labels by type, implementer labelling with spot-checks, or waiting for user feedback: all rejected by owner | Owner answer | 2026-10-22 | |
@@ -197,7 +210,7 @@ swipe-to-apply product.
 | X5 | accepted | No billing model is assumed or implemented | Owner requirement | | Owner brief | 2026-10-21 | |
 | X6 | accepted | A universal global jobs API is not assumed to exist; ATS feeds are employer-specific | Owner requirement and factual constraint | | Owner brief | 2026-10-21 | |
 
-## Open questions
+## Questions
 
 | ID | Status | Decision | Why | Alternatives | Source | Date | Supersedes |
 |---|---|---|---|---|---|---|---|
@@ -222,25 +235,56 @@ swipe-to-apply product.
 | Q19 | resolved | Answered by D91 | Owner accepted the implementer recommendation: results now, then an offer to save | See D91 | Owner answer | 2026-10-22 | |
 | Q20 | resolved | Answered by D92 | Owner accepted the implementer recommendation: exclude unknown sponsorship by default, with a count and an opt-in | See D92 | Owner answer | 2026-10-22 | |
 | Q21 | resolved | Answered by D105 and D106 | Owner chose one glance screen with a single confirm, edits optional, and defaulted schedule settings | Keep item-by-item review; skip review entirely and trust extraction | Owner answer | 2026-10-23 | |
-| Q22 | open | Should hard constraints be conditional on location, for example a minimum base salary that applies only to UAE roles, and should relocation sponsorship be an evidence state distinct from visa sponsorship under D86? Recommendation: yes to both; constraints become per-location groups in the D85 structured output, and relocation adds offered_explicitly, explicitly_not_offered, not_stated alongside visa sponsorship. Where a location carries a strict salary floor, undisclosed pay does not pass, and a published range passes only when its lower bound meets the floor in annual base excluding bonus and equity; a range that straddles the floor goes to a separate needs-salary-confirmation group outside qualified matches | D85 maps locations and arrangement but every constraint applies globally; the owner's current filter needs a salary floor for one region and sponsored relocation for others | Keep global constraints; fold relocation into visa sponsorship | Owner comparison with an existing research agent | 2026-10-23 | |
+| Q22 | resolved | Answered by D113 | Owner accepted the recommendation: per-location constraint groups, relocation sponsorship as its own evidence state, strict floors fail undisclosed pay and straddling ranges | Keep global constraints; fold relocation into visa sponsorship | Owner answer | 2026-10-26 | |
+| Q23 | open | Should profile and preference read/save failures show a retryable error while preserving the last committed state? Recommend yes. Blocks: J3, J4, J5.S8. Owner: product owner. | Earlier reviews marked application-database failures n/a; D95 covers only required external services. Provider-uncertain email still follows D23 and D103. | A silent failure or an unspecified recovery state | Implementer recommendation; not accepted | 2026-10-26 | |
 
 ## Accepted scope and next action
 
-Product questions Q1 to Q21 are resolved as of 2026-10-23. Q22 (location-conditional constraints and relocation sponsorship) is open. D107 to D112 were added from the owner's comparison with an existing daily research agent. J3 and J4 were re-expanded for D104 under D105 and D106.
+Q1–Q22 are resolved, including the existing owner-approved D113 answer of
+2026-10-26. Q23 is an unaccepted failure-default recommendation for profile and preference
+operations in J3/J4 and the relocated digest-settings save in J5.S8.
+D90 remains a draft builder proposal; this update does not accept it.
 
-All eleven branch reviews in docs/journeys/thin-flow.yaml are closed as of
-2026-10-23 under D95 to D103, which the owner accepted from the implementer
-recommendations recorded against each review. The --ready gate now fails only on
-unresolved coverage goals, not on any branch review.
+The editable journey source is now [thin-flow.md](journeys/thin-flow.md), migrated
+with agentic-skills `9ec781b` on `vinay/markdown-journeys` (2026-10-26).
+Repository-local skill copies and their provenance are in
+[`.agents/skills`](../.agents/skills/README.md); checks need no sibling checkout.
+The current checker reads Markdown directly; YAML, `--verification`,
+`--require-links` and `--coverage` are no longer its interface. Existing decision
+tables remain supported, so policy text, sources, dates and IDs are preserved.
+Some historical decisions exceed the new brevity budget; they are retained in
+full rather than losing accepted qualifications during a format update.
 
-Still open: two verification debts, namely the ATS endpoint shapes of O4 and the
-open-source tool licences in docs/evals-plan.md, both taken from secondary sources
-and to be re-verified before anything depends on them. The criteria added under
-D95 to D103 have no verification links yet, because none of them is implemented.
+D114–D124 record the owner-approved three-screen onboarding and question formats.
+Résumé confirmation stays inline; the search screen shows its interpretation and
+only missing eligibility questions; the matches screen offers optional digest
+start and schedule editing. Finding matches alone does not opt the subscriber in.
+The exact question copy, controls and conditions are listed in
+[thin-flow.md](journeys/thin-flow.md#onboarding-questions).
 
-Known spine work: coverage goals C9 to C14 are unresolved, so neither the
---coverage nor the --ready gate passes. Continuous discovery under D61 to D66 is a
-stage 1 goal, so C14 must be mapped by extending J6 before stage 1 is ready.
+D107–D113 are now mapped: web-search discovery and automated employer admission,
+possible-repeat evidence, funnel and resource counters, ambiguous-page checks,
+reapplication restrictions and location-specific constraints. C14 is mapped to
+J6, including independent discovery and verification budgets. The old permanent
+employer cap and ambiguous pending-admission state were retired in favor of
+D61 and D64. The journey file lists their replacement IDs.
 
-Next action: scaffold stage 1. Planning adds no authorisation to provision,
-deploy or commit beyond what the owner has approved.
+The draft structural check passes. Build readiness still fails on Q23, unmapped
+goals C9–C13, C15 and C16, and missing owner approval. C15’s onboarding search
+is mapped, while its returning-subscriber one-off search/save interaction remains
+unmapped; C16 tracks application history entry. The optional history invitation
+is mapped without requiring history during onboarding. Closing an earlier
+seven-category review did not establish every user-visible failure outcome under
+the new four-check workflow.
+
+Historical verification debts remain: O4 ATS endpoint shapes and the tool licence
+findings in [evals-plan.md](evals-plan.md) need primary-source verification before
+implementation depends on them. This migration does not refresh those findings.
+Existing unit-test links remain in [verification.json](verification.json), with
+retired links identified as historical. Links do not prove complete implementation.
+
+The pure core modules exist; the web app, agent, persistence and email are not
+built. D113 location groups, salary floors and relocation evidence and D108’s
+possibly-seen history state still need implementation. Next: settle Q23 and map
+the remaining in-scope goals before seeking approval for build. No approval
+stamp, deployment or provisioning is implied by this documentation update.

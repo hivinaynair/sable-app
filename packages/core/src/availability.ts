@@ -31,7 +31,7 @@ export function classifyOutcome(outcome: RetrievalOutcome): Classification {
   switch (outcome.kind) {
     case "feed":
       if (outcome.listed) return { availability: "verified_open", evidenceTier: "feed" };
-      // Absence only proves closure when the employer's whole feed was read (J6.S3.c4, J6.S2.c2).
+      // Absence only proves closure when the employer's whole feed was read (J6.S3.c4, J6.S2.c8).
       return outcome.complete ? { availability: "confirmed_closed", evidenceTier: "feed" } : UNCERTAIN;
 
     case "http_error":

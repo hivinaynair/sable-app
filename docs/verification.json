@@ -165,10 +165,10 @@
       "locator": "J5.S6.c2 never pads to reach the target with openings that failed a filter"
     }
   ],
-  "J6.S2.c2": [
+  "J6.S2.c8": [
     {
       "path": "../packages/core/tests/availability.test.ts",
-      "locator": "J6.S2.c2 does not close a listing missing from a partial feed response"
+      "locator": "J6.S2.c8 does not close a listing missing from a partial feed response"
     }
   ],
   "J6.S3.c2": [

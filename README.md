@@ -17,12 +17,17 @@ bun install
 bun test            # all tests, through bun's test runner
 bun run typecheck   # through turbo
 bun run spec:links  # regenerate docs/verification.json from test names
-bun run check:spec  # validate the journey spec and its test links
+bun run check:spec  # validate Markdown structure and saved unit-test links
 ```
 
 - `docs/decisions.md`: decision record (accepted decisions, exclusions, open questions)
-- `docs/journeys/thin-flow.yaml`: journey spine for the first end-to-end flow; `thin-flow.md` is generated from it
+- `docs/journeys/thin-flow.md`: editable journey spec for the first end-to-end flow
 - `docs/evals-plan.md`: evaluation strategy and open-source tooling assessment
 
 Specs follow the `decide` and `journeys` skills from
 [hivinaynair/agentic-skills](https://github.com/hivinaynair/agentic-skills).
+Copies of both skills and the checker are included in [`.agents/skills`](.agents/skills/README.md),
+pinned to `9ec781b`; no sibling checkout is needed. Markdown is the editable spec
+format. The draft checker can pass
+with open questions; `--ready` additionally requires complete goals, outcome checks
+and current owner approval. Neither check runs tests.

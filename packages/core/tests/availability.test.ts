@@ -21,7 +21,7 @@ describe("availability classification", () => {
     expect(classifyOutcome({ kind: "feed", listed: false, complete: true }).availability).toBe("confirmed_closed");
   });
 
-  it("J6.S2.c2 does not close a listing missing from a partial feed response", () => {
+  it("J6.S2.c8 does not close a listing missing from a partial feed response", () => {
     expect(classifyOutcome({ kind: "feed", listed: false, complete: false }).availability).toBe("uncertain");
   });
 

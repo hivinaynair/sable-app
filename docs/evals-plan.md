@@ -13,11 +13,11 @@ no assertion can express.
 
 | Layer | What it proves | Tool | Runs |
 |---|---|---|---|
-| 1 Deterministic unit and integration tests | Pipeline invariants that are code, not model behaviour | Vitest | Every commit |
-| 2 Golden fixture corpus | Extraction and classification against frozen real-world inputs with labelled ground truth | Vitest over committed fixtures | Every commit |
+| 1 Deterministic unit and integration tests | Pipeline invariants that are code, not model behaviour | Bun test | Every commit |
+| 2 Golden fixture corpus | Extraction and classification against frozen real-world inputs with labelled ground truth | Bun test over committed fixtures | Every commit |
 | 3 eve agent evals | The agent booted, chose the right tools, respected its boundaries | eve defineEval and eve eval | Every PR |
 | 4 Judge-graded evals | Groundedness of fit explanations, where no assertion suffices | eve t.judge | Nightly and pre-release |
-| 5 Adversarial and security suite | Prompt injection, SSRF, namesake confusion, stale listings | Vitest plus eve evals, optionally Garak or Promptfoo | Nightly and pre-release |
+| 5 Adversarial and security suite | Prompt injection, SSRF, namesake confusion, stale listings | Bun test plus eve evals, optionally Garak or Promptfoo | Nightly and pre-release |
 
 Layer 3 is the backbone and it is eve's own framework, not a third-party addition.
 `eve eval` boots a real agent server, drives it over the TypeScript client protocol,
@@ -28,7 +28,7 @@ it, so third-party tools below are chosen only where eve has no equivalent.
 
 ## Layer 1: what must never be model-graded
 
-Most of our invariants are enforced in code per D31, so they belong in Vitest, where
+Most of our invariants are enforced in code per D31, so they belong in Bun’s test runner under D94, where
 they are fast, free and deterministic. Each test cites the criterion it proves.
 
 | Invariant | Test focus | Criteria proved |
@@ -148,7 +148,7 @@ repository**; verify before adopting any of them.
 | Tool | Licence as reported | Role it could play here | Verdict |
 |---|---|---|---|
 | eve evals (`defineEval`) | Part of eve | Layers 3 and 4: drives the real agent over HTTP, tool stubs, tool-call assertions, judge, reporters | **Adopt. This is the backbone.** No third-party agent-eval framework is needed alongside it |
-| Vitest | MIT | Layers 1, 2 and parts of 5 | **Adopt.** Already the eve repo's own test runner, so no new toolchain |
+| Vitest | MIT | Layers 1, 2 and parts of 5 | **Not adopted.** D94 selects Bun’s test runner; eve’s internal test tooling does not set this repository’s runner |
 | NVIDIA Garak | Apache 2.0 | Layer 5: hundreds of prompt-injection and jailbreak probes, the broadest ready-made attack corpus | **Adopt later, as a corpus source.** Point it at our agent's HTTP surface in a nightly job; mine its probe set for payloads to embed in our own fixtures rather than depending on it in CI |
 | Promptfoo | MIT | Layer 5 red-teaming plus prompt regression; has an MCP plugin for tool-calling vulnerabilities | **Consider.** Capable, but its prompt-regression half duplicates eve evals. Reported acquired by OpenAI, with the date reported inconsistently across sources and unverified, which is worth weighing for roadmap neutrality |
 | Microsoft PyRIT | MIT | Layer 5: orchestrating automated multi-turn attacks at scale | **Defer.** Multi-turn attack orchestration is more than a read-only research agent needs in v1 |
@@ -166,17 +166,25 @@ decision to take explicitly.
 
 ## Wiring evals back to the spec
 
-The journeys validator accepts a verification map linking criterion IDs to tests:
+The current journeys checker validates the editable Markdown spec. Test links
+are maintained separately by this repository:
 
 ```sh
-bun <journeys>/scripts/journeys.ts check docs/journeys/thin-flow.yaml \
-  --verification docs/verification.json --require-links
+bun run spec:links  # regenerate docs/verification.json from test titles
+bun run check:spec  # check Markdown, rule IDs and saved file/title links
+bun test           # execute the tests separately
 ```
 
-Keys are rule IDs such as `J5.S4.c2`, values name a file and a locator. We write that
-map as the tests appear, so the spine tells us which of its 112 rules have no test at
-all. The checker verifies the file and locator exist. It does not run the test and does
-not inspect its assertions, so a linked test is not proof of behaviour.
+Map keys are criterion or invariant IDs; values name a test file and its title.
+The link check reconstructs the map from existing test files and accepts active
+or explicitly retired IDs. Retired links remain historical evidence and do not
+count toward current rule coverage. Missing links are implementation gaps, not
+proof that an unlinked behavior is wrong. The old `--verification` and
+`--require-links` options are retired; future task plans can attach named tests
+and completion evidence using the upstream tasks workflow.
+
+A linked test still needs assertion review and a successful run. It does not
+prove the web, agent, database, provider or live behavior is implemented.
 
 ## Staging
 
@@ -185,7 +193,7 @@ not inspect its assertions, so a linked test is not proof of behaviour.
 - Stage 2: layer 2 corpus and the layer 3 research and matching evals, with
   `research/prefers-feed-over-browser` first since it guards the cost ceiling.
 - Stage 3: layer 4 judge evals nightly, Langfuse or Phoenix for production traces,
-  and the verification map with `--require-links`.
+  and current rule-to-test coverage through `bun run check:spec`.
 - Stage 4: layer 5 adversarial suite, with Garak mined for payloads.
 
 ## Settled questions

@@ -21,7 +21,7 @@
     "preinstall": "bunx only-allow@1.2.2 bun",
     "test": "bun test",
     "typecheck": "turbo run typecheck",
-    "check:spec": "bun ../agentic-skills/skills/journeys/scripts/journeys.ts check docs/journeys/thin-flow.yaml --verification docs/verification.json",
+    "check:spec": "bun .agents/skills/journeys/scripts/journeys.ts check docs/journeys/thin-flow.md && bun scripts/gen-verification.mjs --check",
     "spec:links": "bun scripts/gen-verification.mjs"
   },
   "devDependencies": {

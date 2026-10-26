@@ -8,8 +8,8 @@ see it in context rather than take it on trust (D79, D80).
 
 **1. Decide what "correct" means before building anything.**
 The decision record (`docs/decisions.md`) and the journey spine
-(`docs/journeys/thin-flow.yaml`) were written before a line of code. The spine has
-114 numbered rules such as `J5.S4.c2`, and later every test cites the rule it proves.
+(now `docs/journeys/thin-flow.md`) were written before a line of code. The original
+spine had 114 numbered rules such as `J5.S4.c2`; later tests cite the rule they exercise.
 Without this, an eval has nothing fixed to measure against. You end up grading the
 agent against whatever you happened to think on the day.
 
@@ -68,9 +68,10 @@ unverified job) can be proven rather than hoped for. See
 **10. Name each test after the rule it proves.**
 Every test title starts with a rule ID such as `J5.S2.c2`.
 `scripts/gen-verification.mjs` turns those names into `docs/verification.json`, and
-the journeys checker confirms every link resolves. Today 27 of 114 rules have a
-test. Read that number as a coverage map: the missing 87 are the parts not built
-yet, and the gap is visible rather than guessed.
+`bun run check:spec` verifies saved links against current test files and rule IDs.
+The original snapshot linked 27 of 114 rules. Run the check for current counts;
+retired links remain historical and do not count as coverage of their replacements.
+A title names intended coverage; the assertions and test run establish what was tested.
 
 **11. Test the edge cases the brief named, literally.**
 The brief said a 403, CAPTCHA, blank page or single 404 is not proof of closure.
